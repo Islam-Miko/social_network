@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "webtronics"
+version = "0.1.0"
+description = ""
+authors = ["miko <islamimanhod@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.89.0"
+SQLAlchemy = "^1.4.46"
+alembic = "^1.9.1"
+asyncpg = "^0.27.0"
+uvicorn = {extras = ["standard"], version = "^0.20.0"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+bcrypt = "^4.0.1"
+passlib = "^1.7.4"
+pydantic = {extras = ["dotenv"], version = "^1.10.4"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
