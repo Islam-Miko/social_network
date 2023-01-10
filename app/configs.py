@@ -1,5 +1,6 @@
-from pydantic import BaseSettings
 from pathlib import Path
+
+from pydantic import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
