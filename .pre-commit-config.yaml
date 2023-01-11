@@ -16,7 +16,8 @@ repos:
             - --no-strict-optional
             - --ignore-missing-imports
           additional_dependencies:
-            - "sqlalchemy"
+          - "sqlalchemy"
+          - "types-PyYAML"
   -   repo: https://github.com/psf/black
       rev: 22.6.0
       hooks:

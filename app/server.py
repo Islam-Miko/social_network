@@ -1,6 +1,13 @@
 from fastapi import FastAPI, Request
 
-app = FastAPI()
+
+def get_application():
+
+    app = FastAPI()
+    return app
+
+
+app = get_application()
 
 
 @app.get("/")
