@@ -6,8 +6,22 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 
 from .authentication.middleware import JWTAuthentication
 from .authentication.routes import router
+from .base.middlewares import dbsession_middleware
 
-app = FastAPI()
+
+def get_application() -> FastAPI:
+    app = FastAPI()
+    app.include_router(router)
+    app.middleware("http")(dbsession_middleware)
+
+    @app.get("/")
+    async def starter(request: Request):
+        return {"msg": "ok"}
+
+    return app
+
+
+app = get_application()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,12 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuthentication())
-app.include_router(router)
-
-
-@app.get("/")
-async def starter(request: Request):
-    return {"msg": "ok"}
 
 
 @app.exception_handler(AuthenticationError)

@@ -3,11 +3,11 @@ from typing import Callable
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from .dependencies import get_settings
+from .configs import Settings
 
 
 def create_engine() -> Callable[..., Session]:
-    settings = get_settings()
+    settings = Settings()
 
     database_url = settings.database_url
 

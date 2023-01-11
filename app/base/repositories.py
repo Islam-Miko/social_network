@@ -14,11 +14,11 @@ from .models import BaseModel
 
 class ABCRepository(abc.ABC):
     @abc.abstractmethod
-    async def create(self, **data: Mapping) -> Any:
+    async def create(self, **data: Mapping[Any, Any]) -> Any:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def get(self, *args: Iterable, **kwargs: Mapping) -> Any:
+    async def get(self, *args: Iterable, **kwargs: Mapping[Any, Any]) -> Any:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -26,7 +26,7 @@ class ABCRepository(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def update(self, pk: int, *args: Iterable, **kwargs: Mapping) -> Any:
+    async def update(self, pk: int, **kwargs: Mapping[Any, Any]) -> Any:
         raise NotImplementedError
 
 
@@ -35,13 +35,13 @@ class SqlAlchemyRepository(ABCRepository):
         self.__session = session
         self.model = model
 
-    async def create(self, **data: Mapping) -> Any:
+    async def create(self, **data) -> Any:
         instance = self.model(**data)
         self.__session.add(instance)
         await self.__session.flush()
         return instance
 
-    async def get(self, *args: Iterable, **kwargs: Mapping) -> Any:
+    async def get(self, *args: Iterable, **kwargs: Mapping[Any, Any]) -> Any:
         try:
             query = select(self.model).filter(*args, **kwargs)
             result: ResultProxy = await self.__session.execute(query)
@@ -54,6 +54,7 @@ class SqlAlchemyRepository(ABCRepository):
             query = (
                 update(self.model)
                 .filter(self.model.id == pk)
+                .returning(self.model)
                 .values(deleted_at=datetime.utcnow())
             )
             result: ResultProxy = await self.__session.execute(query)
@@ -61,7 +62,7 @@ class SqlAlchemyRepository(ABCRepository):
         except NoResultFound:
             raise
 
-    async def update(self, pk: int, *args: Iterable, **kwargs: Mapping) -> Any:
+    async def update(self, pk: int, **kwargs: Mapping[Any, Any]) -> Any:
         try:
             query = (
                 update(self.model)
@@ -74,7 +75,7 @@ class SqlAlchemyRepository(ABCRepository):
         except NoResultFound:
             raise
 
-    async def all(self, *args: Iterable, **kwargs: Mapping) -> list:
+    async def all(self, *args: Iterable) -> list:
         query = select(self.model).filter(self.model.deleted_at.is_(None))
         if args:
             query.filter(*args)
