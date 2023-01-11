@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  api:
+    container_name: webtronics-api
+    build:
+      context: .
+      target: prod
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    volumes:
+      - ./migrations/versions/:/app/migrations/versions/
+
+  db:
+    container_name: webtronics-db
+    image: "postgres:13-alpine"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+
+    env_file:
+      - .env
+
+volumes:
+  postgres-data: null
