@@ -13,8 +13,6 @@ from alembic.config import Config
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.server import get_application
-
 logger = logging.getLogger(__name__)
 
 
@@ -26,24 +24,6 @@ def event_loop():
     loop = asyncio.get_event_loop_policy().get_event_loop()
     yield loop
     loop.close()
-
-
-@pytest.fixture(autouse=True)
-def apply_migrations(get_database_url):
-    os.environ["DATABASE_URL"] = get_database_url
-    config = Config("alembic.ini")
-    alembic.command.upgrade(config, "head")
-    yield
-
-
-@pytest_asyncio.fixture
-async def session(db_engine):
-    session = sessionmaker(
-        db_engine, expire_on_commit=False, class_=AsyncSession
-    )()
-
-    yield session
-    await session.close()
 
 
 @pytest.fixture(scope="session")
@@ -78,7 +58,7 @@ def docker_tmpfile():
 @pytest.fixture(scope="session")
 def docker_compose_file(docker_tmpfile, postgres_data):
     content = {
-        "version": "3.8",
+        "version": "3.7",
         "services": {
             "postgresql": {
                 "image": "postgres:13-alpine",
@@ -88,7 +68,7 @@ def docker_compose_file(docker_tmpfile, postgres_data):
                         postgres_data["postgres"]["password"]
                     ),
                     "POSTGRES_USER={}".format(
-                        postgres_data["postgres"]["password"]
+                        postgres_data["postgres"]["user"]
                     ),
                     "POSTGRES_DB={}".format(
                         postgres_data["postgres"]["dbname"]
@@ -104,7 +84,6 @@ def docker_compose_file(docker_tmpfile, postgres_data):
 
 
 def is_responsive(ip, postgres_data):
-
     try:
         conn = psycopg2.connect(
             host=ip,
@@ -133,13 +112,27 @@ async def db_engine(
     yield default_engine
 
 
+@pytest.fixture
+def apply_migrations(get_database_url):
+    os.environ["DATABASE_URL"] = get_database_url
+    config = Config("alembic.ini")
+    alembic.command.upgrade(config, "head")
+    yield
+
+
+@pytest_asyncio.fixture
+async def session(db_engine, apply_migrations):
+    session = sessionmaker(
+        db_engine, expire_on_commit=False, class_=AsyncSession
+    )()
+    yield session
+    await session.close()
+
+
 @pytest_asyncio.fixture
 async def client():
+    from app.server import get_application
+
     app = get_application()
-
-    @app.get("/")
-    async def ping():
-        return {"ok": "pong"}
-
-    async with httpx.AsyncClient(app=app, base_url="http://test") as client:
+    async with httpx.AsyncClient(app=app, base_url="http://testing") as client:
         yield client

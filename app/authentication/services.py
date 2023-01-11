@@ -4,12 +4,12 @@ from typing import Any, Dict
 
 from jose import jwt
 from passlib.context import CryptContext
+from sqlalchemy.orm import Session
 from starlette.authentication import AuthenticationError
 
 from app import messages
 
 from ..base.repositories import SqlAlchemyRepository
-from ..db import async_session
 from ..dependencies import get_settings
 from ..exceptions import InvalidTokenError
 from .models import Credential, RefreshToken
@@ -31,8 +31,7 @@ class AuthenticationHandler:
     handler = PasswordHandler
     settings = get_settings()
 
-    async def authorize(self, login: str, password: str):
-        session = async_session()
+    async def authorize(self, login: str, password: str, session: Session):
         repo = SqlAlchemyRepository(session, Credential)
         user_credential = await repo.get_or_none(Credential.login == login)  # type: ignore
 
@@ -43,7 +42,6 @@ class AuthenticationHandler:
             password, user_credential.password
         ):
             raise AuthenticationError("Invalid credentials.")
-        await session.close()
         return user_credential
 
     async def generate_token(
@@ -62,9 +60,8 @@ class AuthenticationHandler:
         return encoded, expires_at
 
     async def refresh_token(
-        self, access_token: str, refresh_token: str
+        self, access_token: str, refresh_token: str, session: Session
     ) -> tuple[str, float]:
-        session = async_session()
         repo = SqlAlchemyRepository(session, RefreshToken)
         payload = jwt.decode(
             access_token,
@@ -73,8 +70,7 @@ class AuthenticationHandler:
         )
         _, key, _ = refresh_token.split(".")
         instance = await repo.get(RefreshToken.key == key)
-        await session.close()
-        if datetime.now() > datetime.fromtimestamp(instance.valid_until):
+        if datetime.utcnow() > datetime.fromtimestamp(instance.valid_until):
             raise InvalidTokenError(messages.EXPIRED_TOKEN)
 
         expires_at = datetime.timestamp(

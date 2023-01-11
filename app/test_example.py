@@ -1,3 +1,3 @@
-async def test_example(client):
+async def test_example(client, session):
     response = await client.get("/")
-    assert response.json() == {"ok": "pong"}
+    assert response.json() == {"msg": "ok"}
