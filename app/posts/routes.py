@@ -10,6 +10,7 @@ from ..dependencies import get_db
 from .models import Post
 from .schema import PostCreateSchema, UpdatePostSchema
 from .services import check_and_delete_post
+from .services import dislike_post as user_dislike_post
 from .services import like_post as user_like_post
 
 router = APIRouter(prefix="/posts")
@@ -22,10 +23,13 @@ router = APIRouter(prefix="/posts")
     ]
 )
 async def get_posts(
-    session: AsyncSession = Depends(get_db), Authorization: str = Header(...)
+    request: Request,
+    session: AsyncSession = Depends(get_db),
+    Authorization: str = Header(...),
 ):
     return await paginate(
-        session, select(Post).filter(Post.deleted_at.is_(None))
+        session,
+        select(Post).filter(Post.deleted_at.is_(None)),
     )
 
 
@@ -103,4 +107,17 @@ async def like_post(
     request: Request, post_id: int, Authorization: str = Header(...)
 ):
     await user_like_post(post_id, request)
+    return 200
+
+
+@router.delete("/{post_id}/dislike/", status_code=204)
+@permission_classes(
+    [
+        IsAuthenticated,
+    ]
+)
+async def dislike_post(
+    request: Request, post_id: int, Authorization: str = Header(...)
+):
+    await user_dislike_post(post_id, request)
     return 200

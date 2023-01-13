@@ -21,30 +21,42 @@ async def delete_self_post(id: int, repo: SqlAlchemyRepository) -> None:
     await repo.execute_query(query)
 
 
-async def check_for_self_post(
+async def check_if_post_owner(
     id: int, user_id: int, repo: SqlAlchemyRepository
-) -> None:
+) -> bool:
     query = (
         origin_exists(Post)
         .where(Post.id == id, Post.owner == user_id)
         .select()
     )
     result: Result = await repo.execute_query(query, return_result=True)
-    if not result:
-        raise HTTPException(
-            status_code=400,
-            detail=messages.ACTIONS_NOT_ALLOWED_ON_SELF_OBJECTS,
-        )
+    return result
 
 
 async def check_and_delete_post(id: int, request: Request) -> None:
     session = request.state.dbsession()
     repo = SqlAlchemyRepository(session, Post)
 
-    await check_for_self_post(id, request.user.id, repo)
+    is_owner = await check_if_post_owner(id, request.user.id, repo)
+    if not is_owner:
+        raise HTTPException(
+            status_code=400,
+            detail=messages.ACTION_NOT_ALLOWED,
+        )
     await delete_self_post(id, repo)
     await session.commit()
     await session.close()
+
+
+async def check_for_self_post(
+    post_id: int, user_id: int, repo: SqlAlchemyRepository
+) -> None:
+    is_owner = await check_if_post_owner(post_id, user_id, repo)
+    if is_owner:
+        raise HTTPException(
+            status_code=400,
+            detail=messages.ACTION_NOT_ALLOWED,
+        )
 
 
 async def like_post(post_id: int, request: Request) -> None:
@@ -52,8 +64,19 @@ async def like_post(post_id: int, request: Request) -> None:
     repo = SqlAlchemyRepository(session, Post)
 
     await check_for_self_post(post_id, request.user.id, repo)
-    post: Post = await repo.get(Post.id == post_id)
-    statement = Like.insert().values(user_id=request.user.id, post_id=post.id)
+    statement = Like.insert().values(user_id=request.user.id, post_id=post_id)
+    await repo.execute_query(statement)
+    await session.commit()
+    await session.close()
+
+
+async def dislike_post(post_id: int, request: Request) -> None:
+    session = request.state.dbsession()
+    repo = SqlAlchemyRepository(session, Post)
+    user_id = request.user.id
+
+    await check_for_self_post(post_id, user_id, repo)
+    statement = Like.delete().where(user_id=user_id, post_id=post_id)
     await repo.execute_query(statement)
     await session.commit()
     await session.close()
