@@ -13,6 +13,10 @@ from .models import BaseModel
 
 
 class ABCRepository(abc.ABC):
+    """
+    Base class
+    """
+
     @abc.abstractmethod
     async def create(self, **data: Mapping[Any, Any]) -> Any:
         raise NotImplementedError
@@ -31,6 +35,10 @@ class ABCRepository(abc.ABC):
 
 
 class SqlAlchemyRepository(ABCRepository):
+    """
+    Class for working with db
+    """
+
     def __init__(self, session: Session, model: BaseModel) -> None:
         self.__session = session
         self.model = model

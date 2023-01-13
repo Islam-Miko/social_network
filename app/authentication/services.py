@@ -31,7 +31,12 @@ class AuthenticationHandler:
     handler = PasswordHandler
     settings = get_settings()
 
-    async def authorize(self, login: str, password: str, session: Session):
+    async def authorize(
+        self, login: str, password: str, session: Session
+    ) -> Credential:
+        """
+        Authenticate user
+        """
         repo = SqlAlchemyRepository(session, Credential)
         user_credential = await repo.get_or_none(Credential.login == login)  # type: ignore
 
@@ -46,7 +51,10 @@ class AuthenticationHandler:
 
     async def generate_token(
         self, token_type: str = "access", data: Dict[str, Any] = dict()
-    ):
+    ) -> tuple[str, float]:
+        """
+        Generate jwt token
+        """
         token_lifetime = {
             "access": self.settings.access_token_lifetime,
             "refresh": self.settings.refresh_token_lifetime,
@@ -62,6 +70,9 @@ class AuthenticationHandler:
     async def refresh_token(
         self, access_token: str, refresh_token: str, session: Session
     ) -> tuple[str, float]:
+        """
+        Generate new access token by given refresh token
+        """
         repo = SqlAlchemyRepository(session, RefreshToken)
         payload = jwt.decode(
             access_token,
