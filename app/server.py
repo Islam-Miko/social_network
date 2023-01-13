@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request, status
+from fastapi import Depends, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 from fastapi_pagination import add_pagination
 from starlette.authentication import AuthenticationError
 from starlette.middleware.authentication import AuthenticationMiddleware
@@ -13,9 +14,10 @@ from .posts.routes import router as post_router
 
 
 def get_application() -> FastAPI:
+    bearer = HTTPBearer()
     app = FastAPI()
     app.include_router(router)
-    app.include_router(post_router)
+    app.include_router(post_router, dependencies=[Depends(bearer)])
     app.include_router(decode_router)
 
     app.middleware("http")(dbsession_middleware)

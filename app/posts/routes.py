@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi_pagination import LimitOffsetPage
 from fastapi_pagination.ext.async_sqlalchemy import paginate
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +25,6 @@ router = APIRouter(prefix="/posts")
 async def get_posts(
     request: Request,
     session: AsyncSession = Depends(get_db),
-    Authorization: str = Header(...),
 ):
     return await paginate(
         session,
@@ -39,9 +38,7 @@ async def get_posts(
         IsAuthenticated,
     ]
 )
-async def create_post(
-    request: Request, data: PostCreateSchema, Authorization: str = Header(...)
-):
+async def create_post(request: Request, data: PostCreateSchema):
     session = request.state.dbsession()
     repo = SqlAlchemyRepository(session, Post)
     created = await repo.create(**data.dict(), owner=request.user.id)
@@ -56,7 +53,7 @@ async def create_post(
         IsAuthenticated,
     ]
 )
-async def get_one(request: Request, id: int, Authorization: str = Header(...)):
+async def get_one(request: Request, id: int):
     session = request.state.dbsession()
     repo = SqlAlchemyRepository(session, Post)
     instance = await repo.get(Post.id == id)
@@ -70,12 +67,7 @@ async def get_one(request: Request, id: int, Authorization: str = Header(...)):
         IsAuthenticated,
     ]
 )
-async def update_post(
-    request: Request,
-    id: int,
-    data: UpdatePostSchema,
-    Authorization: str = Header(...),
-):
+async def update_post(request: Request, id: int, data: UpdatePostSchema):
     session = request.state.dbsession()
     repo = SqlAlchemyRepository(session, Post)
     instance = await repo.update(id, **data.dict(exclude_none=True))
@@ -90,9 +82,7 @@ async def update_post(
         IsAuthenticated,
     ]
 )
-async def delete_post(
-    request: Request, id: int, Authorization: str = Header(...)
-):
+async def delete_post(request: Request, id: int):
     await check_and_delete_post(id, request)
     return 204
 
@@ -103,9 +93,7 @@ async def delete_post(
         IsAuthenticated,
     ]
 )
-async def like_post(
-    request: Request, post_id: int, Authorization: str = Header(...)
-):
+async def like_post(request: Request, post_id: int):
     await user_like_post(post_id, request)
     return 200
 
@@ -116,8 +104,6 @@ async def like_post(
         IsAuthenticated,
     ]
 )
-async def dislike_post(
-    request: Request, post_id: int, Authorization: str = Header(...)
-):
+async def dislike_post(request: Request, post_id: int):
     await user_dislike_post(post_id, request)
     return 200

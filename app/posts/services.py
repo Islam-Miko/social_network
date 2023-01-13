@@ -76,7 +76,9 @@ async def dislike_post(post_id: int, request: Request) -> None:
     user_id = request.user.id
 
     await check_for_self_post(post_id, user_id, repo)
-    statement = Like.delete().where(user_id=user_id, post_id=post_id)
+    statement = Like.delete().where(
+        Like.c.user_id == user_id, Like.c.post_id == post_id
+    )
     await repo.execute_query(statement)
     await session.commit()
     await session.close()

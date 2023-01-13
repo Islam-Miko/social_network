@@ -55,4 +55,5 @@ class JWTAuthentication(AuthenticationBackend):
         user: User = await repo.get(
             User.credentials.any(Credential.login == login)
         )
+        await session.close()
         return AuthCredentials(["authenticated"]), user
