@@ -5,7 +5,7 @@ from typing import Any, Iterable, Mapping, Union
 from sqlalchemy import delete, update
 from sqlalchemy.engine import Result, ResultProxy
 from sqlalchemy.future import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query, Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import exists as origin_exists
 
@@ -95,3 +95,16 @@ class SqlAlchemyRepository(ABCRepository):
     async def force_delete(self, *args: Iterable) -> None:
         query = delete(self.model).filter(*args)
         await self.__session.execute(query)
+
+    async def execute_query(
+        self,
+        stmt: Query,
+        params: tuple = (),
+        return_result: bool = False,
+        fetch_many: bool = False,
+    ) -> Any:
+        result: Result = await self.__session.execute(stmt, params)
+        if return_result and fetch_many:
+            return result.fetchall()
+        elif return_result:
+            return result.scalar_one()

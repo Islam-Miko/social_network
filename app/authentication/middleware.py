@@ -13,7 +13,7 @@ from starlette.requests import HTTPConnection
 from ..base.repositories import SqlAlchemyRepository
 from ..db import async_session
 from ..dependencies import get_settings
-from .models import User
+from .models import Credential, User
 
 log = logging.getLogger(__name__)
 
@@ -52,5 +52,7 @@ class JWTAuthentication(AuthenticationBackend):
             raise AuthenticationError("Failed to decode JWT!") from e
         session = async_session()
         repo = SqlAlchemyRepository(session, User)
-        user: User = await repo.get(User.credentials.login == login)
+        user: User = await repo.get(
+            User.credentials.any(Credential.login == login)
+        )
         return AuthCredentials(["authenticated"]), user
