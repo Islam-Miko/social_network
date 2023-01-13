@@ -1,6 +1,6 @@
 import abc
 from functools import wraps
-from typing import Iterable
+from typing import Iterable, Type
 
 from fastapi import HTTPException, Request, status
 
@@ -16,7 +16,7 @@ class BasePermission(abc.ABC):
 class PermissionsHandler:
     def __init__(
         self,
-        permission_classes: Iterable[BasePermission],
+        permission_classes: Iterable[Type[BasePermission]],
     ):
         self.permission_classes = permission_classes
 
@@ -47,7 +47,7 @@ class AllowAny(BasePermission):
         return True
 
 
-def permission_classes(permissions: Iterable[BasePermission]):
+def permission_classes(permissions: Iterable[Type[BasePermission]]):
     def decorator_permission(func):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
