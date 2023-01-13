@@ -2,6 +2,7 @@ from sqlalchemy import DATE, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, backref, relationship
 
 from ..base.models import BaseModel
+from ..posts.models import Post
 
 
 class User(BaseModel):
@@ -13,6 +14,7 @@ class User(BaseModel):
     credentials: Mapped["Credential"] = relationship(
         "Credential", backref=backref("user", uselist=False, lazy="subquery")
     )
+    self_posts: Mapped["Post"] = relationship("Post")
 
 
 class Credential(BaseModel):
