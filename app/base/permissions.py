@@ -14,6 +14,10 @@ class BasePermission(abc.ABC):
 
 
 class PermissionsHandler:
+    """
+    Class for checking permissions
+    """
+
     def __init__(
         self,
         permission_classes: Iterable[Type[BasePermission]],
@@ -48,6 +52,11 @@ class AllowAny(BasePermission):
 
 
 def permission_classes(permissions: Iterable[Type[BasePermission]]):
+    """
+    Register Permissions on endpoint.
+    Permission.has_permission will be called, before endpoint function call
+    """
+
     def decorator_permission(func):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
