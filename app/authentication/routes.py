@@ -36,7 +36,7 @@ async def generate_access_token(
         RefreshToken.owner == user_credential.id
     )
     if refresh is not None:
-        await repo.force_delete(refresh.id)  # type: ignore
+        await repo.force_delete(RefreshToken.id == refresh.id)  # type: ignore
     await repo.create(key=key, owner=user_credential.id, valid_until=exp_at)  # type: ignore
     await session.commit()
     await session.close()
