@@ -8,6 +8,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from .authentication.middleware import JWTAuthentication
 from .authentication.routes import router
 from .base.middlewares import dbsession_middleware
+from .decode_task.decode_task import router as decode_router
 from .posts.routes import router as post_router
 
 
@@ -15,6 +16,8 @@ def get_application() -> FastAPI:
     app = FastAPI()
     app.include_router(router)
     app.include_router(post_router)
+    app.include_router(decode_router)
+
     app.middleware("http")(dbsession_middleware)
 
     @app.get("/")
