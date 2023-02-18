@@ -1,17 +1,13 @@
-from functools import lru_cache
 from typing import AsyncIterator
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .configs import Settings
-from .db import async_session
+from app.configs.database import SessionFactory
 
 
-@lru_cache
-def get_settings() -> Settings:
-    return Settings()
-
-
-async def get_db() -> AsyncIterator[AsyncSession]:
-    async with async_session() as session:
+async def get_session() -> AsyncIterator[AsyncSession]:
+    session = SessionFactory()
+    try:
         yield session
+    finally:
+        await session.close()
