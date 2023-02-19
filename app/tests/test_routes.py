@@ -1,3 +1,4 @@
+# type: ignore
 from httpx import AsyncClient
 from sqlalchemy.orm import Session
 
