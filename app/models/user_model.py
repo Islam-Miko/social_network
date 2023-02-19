@@ -1,4 +1,3 @@
-from collections.abc import Set
 from datetime import date
 
 from sqlalchemy import DATE, Column, Float, ForeignKey, Integer, String
@@ -19,7 +18,7 @@ class User(BaseAbstractModel):
     birth_date: Mapped[date] = mapped_column(DATE, nullable=False)
 
     credentials: Mapped["Credential"] = relationship(back_populates="user")
-    likes: Mapped[Set["Post"]] = relationship(  # noqa
+    likes: Mapped[set["Post"]] = relationship(  # noqa
         secondary=Like, back_populates="liked_users"
     )
 

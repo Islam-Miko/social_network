@@ -1,5 +1,3 @@
-from collections.abc import Set
-
 from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,6 +13,6 @@ class Post(BaseAbstractModel):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     owner: Mapped[int] = mapped_column(Integer, ForeignKey("sn_user.id"))
 
-    liked_users: Mapped[Set["User"]] = relationship(  # noqa
+    liked_users: Mapped[set["User"]] = relationship(  # noqa
         secondary=Like, back_populates="likes"
     )
