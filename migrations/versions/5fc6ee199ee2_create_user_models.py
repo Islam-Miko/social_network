@@ -17,7 +17,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "webtronics_user",
+        "sn_user",
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
@@ -28,21 +28,27 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "webtronics_credential",
+        "sn_credential",
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column(
             "id",
             sa.SmallInteger,
-            sa.ForeignKey("webtronics_user.id"),
             primary_key=True,
         ),
         sa.Column("login", sa.String(50), nullable=False),
         sa.Column("password", sa.String(255), nullable=False),
+        sa.Column("user_id", sa.Integer, nullable=False),
+        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["sn_user.id"],
+            ondelete="CASCADE",
+        ),
     )
 
 
 def downgrade() -> None:
-    op.drop_table("webtronics_user")
-    op.drop_table("webtronics_credential")
+    op.drop_table("sn_user")
+    op.drop_table("sn_credential")

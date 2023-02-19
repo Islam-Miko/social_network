@@ -17,7 +17,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "webtronics_post",
+        "sn_post",
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
@@ -27,28 +27,28 @@ def upgrade() -> None:
         sa.Column(
             "owner",
             sa.Integer,
-            sa.ForeignKey("webtronics_user.id"),
+            sa.ForeignKey("sn_user.id"),
             nullable=False,
         ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
-        "webtronics_like",
+        "sn_like",
         sa.Column(
             "post_id",
             sa.SmallInteger,
-            sa.ForeignKey("webtronics_post.id"),
+            sa.ForeignKey("sn_post.id"),
             primary_key=True,
         ),
         sa.Column(
             "user_id",
             sa.SmallInteger,
-            sa.ForeignKey("webtronics_user.id"),
+            sa.ForeignKey("sn_user.id"),
             primary_key=True,
         ),
     )
 
 
 def downgrade() -> None:
-    op.drop_table("webtronics_like")
-    op.drop_table("webtronics_post")
+    op.drop_table("sn_like")
+    op.drop_table("sn_post")

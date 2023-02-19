@@ -17,7 +17,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.create_table(
-        "webtronics_refresh_token",
+        "sn_refresh_token",
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
@@ -28,11 +28,11 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.ForeignKeyConstraint(
             ["owner"],
-            ["webtronics_user.id"],
+            ["sn_user.id"],
             ondelete="CASCADE",
         ),
     )
 
 
 def downgrade() -> None:
-    op.drop_table("webtronics_refresh_token")
+    op.drop_table("sn_refresh_token")
