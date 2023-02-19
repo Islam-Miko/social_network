@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql import exists as origin_exists
 
-from app.dependencies import get_session
+from app.configs.database import get_session
 
 Model = TypeVar("Model")
 Key = TypeVar("Key", str, int)
