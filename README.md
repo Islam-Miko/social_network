@@ -1,4 +1,4 @@
-# Webtronics Junior Python FastAPI developer test task
+# Junior Python FastAPI developer test task
 
 ## Start app
 You need to have docker and docker-compose v1-v2 on your machine.
