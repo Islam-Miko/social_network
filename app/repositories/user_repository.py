@@ -10,6 +10,7 @@ from app.repositories.base_repository import BaseSqlAlchemyRepository
 
 class UserRepository(BaseSqlAlchemyRepository):
     model = User
+    base_select = select(User).where(User.deleted_at.is_(None))
 
     async def search(
         self,
@@ -50,7 +51,9 @@ class UserRepository(BaseSqlAlchemyRepository):
 
 class CredentialRepository(BaseSqlAlchemyRepository):
     model = Credential
+    base_select = select(Credential).where(Credential.deleted_at.is_(None))
 
 
 class RefreshTokenRepository(BaseSqlAlchemyRepository):
     model = RefreshToken
+    base_select = select(RefreshToken).where(RefreshToken.deleted_at.is_(None))
