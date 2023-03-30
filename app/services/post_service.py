@@ -1,14 +1,21 @@
 from datetime import datetime
+from typing import Sequence
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 
 from app import messages
+from app.mixins import PaginationMixin
 from app.models.post_model import Post
 from app.repositories.post_repository import PostRepository
+from app.schemas.post_schema import (
+    PostCreateSchema,
+    PostSchema,
+    UpdatePostSchema,
+)
 from app.services.like_service import LikeService
 
 
-class PostService:
+class PostService(PaginationMixin):
     repository: PostRepository
 
     def __init__(self, repository: PostRepository = Depends()) -> None:
@@ -50,3 +57,17 @@ class PostService:
     ) -> None:
         await self.check_self_post(id, user_id)
         await like_service.dislike(id, user_id)
+
+    async def get_list(self, offset: int, limit: int, *args: Sequence):
+        return await self.get_paginated(offset, limit, *args)
+
+    async def create_post(self, data: PostCreateSchema, request: Request):
+        data_dict = data.dict(exclude_none=True)
+        data_dict.update({"owner": request.user.id})
+        return await self.repository.create(data_dict)
+
+    async def get_one(self, id: int) -> PostSchema:
+        return await self.repository.get(id)
+
+    async def update(self, id: int, data: UpdatePostSchema) -> Post:
+        return await self.repository.update(id, data.dict(exclude_none=True))
