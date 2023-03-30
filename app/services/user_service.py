@@ -37,9 +37,9 @@ class UserService:
             birth_date=birth_date,
         )
 
-    async def create(self, data: RegistrationSchema) -> User:
+    async def create(self, data: RegistrationSchema) -> int:
         return await self.repository.create(
-            User(**data.dict(exclude={"login", "password"}))
+            data.dict(exclude={"login", "password"})
         )
 
     async def get_by_login(self, login: str) -> User:
@@ -56,7 +56,7 @@ class CredentialService:
         return await self.repository.get_or_none(*args)
 
     async def create(self, data: CredentialSchema) -> Credential:
-        return await self.repository.create(Credential(**data.dict()))
+        return await self.repository.create(data.dict())
 
 
 class RefreshTokenService:
@@ -74,4 +74,4 @@ class RefreshTokenService:
     async def create(
         self, data: RefreshTokenSchema
     ) -> Union[None, RefreshToken]:
-        return await self.repository.create(RefreshToken(**data.dict()))
+        return await self.repository.create(data.dict())
