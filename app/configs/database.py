@@ -18,7 +18,7 @@ def get_database_url(env: Settings) -> str:
 
 database_url = get_database_url(ENV)
 
-db_engine = create_async_engine(database_url, future=True, echo=True)
+db_engine = create_async_engine(database_url, echo=True)
 
 SessionFactory = sessionmaker(
     db_engine,
