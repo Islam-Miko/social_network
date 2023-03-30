@@ -2,29 +2,25 @@ from fastapi import Depends, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
-from fastapi_pagination import add_pagination
 from starlette.authentication import AuthenticationError
 from starlette.middleware.authentication import AuthenticationMiddleware
 
-from .authentication.middleware import JWTAuthentication
-from .authentication.routes import router
-from .base.middlewares import dbsession_middleware
-from .decode_task.decode_task import router as decode_router
-from .posts.routes import router as post_router
+from app.middlewares.authentication import JWTAuthentication
+from app.routes.v2.authentication import router
+from app.routes.v2.post_routes import router as post_router
+
+reuseable_oauth = HTTPBearer(bearerFormat="JWT")
 
 
 def get_application() -> FastAPI:
-    bearer = HTTPBearer()
+
     app = FastAPI()
-    app.include_router(router)
-    app.include_router(post_router, dependencies=[Depends(bearer)])
-    app.include_router(decode_router)
+    app.include_router(post_router, dependencies=[Depends(reuseable_oauth)])
+    app.include_router(router, prefix="/api/v2")
 
-    app.middleware("http")(dbsession_middleware)
-
-    @app.get("/")
+    @app.get("/", dependencies=[Depends(reuseable_oauth)])
     async def starter(request: Request):
-        return {"msg": "ok"}
+        return {"msg": request.user}
 
     return app
 
@@ -38,7 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(AuthenticationMiddleware, backend=JWTAuthentication())
-add_pagination(app)
 
 
 @app.exception_handler(AuthenticationError)
