@@ -37,7 +37,7 @@ class UserService:
             birth_date=birth_date,
         )
 
-    async def create(self, data: RegistrationSchema) -> int:
+    async def create(self, data: RegistrationSchema) -> User:
         return await self.repository.create(
             data.dict(exclude={"login", "password"})
         )

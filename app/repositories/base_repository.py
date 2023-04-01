@@ -26,7 +26,7 @@ class BaseSqlAlchemyRepository:
         self.session = session
 
     async def create(self, data: Mapping) -> Model:
-        query = insert(self.model).values(**data).returning(self.model.id)
+        query = insert(self.model).values(**data).returning(self.model)
         result: AsyncResult = await self.session.execute(query)
         await self.session.commit()
         return result.scalar_one()
@@ -71,7 +71,7 @@ class BaseSqlAlchemyRepository:
     async def get_or_none(self, *args: Iterable) -> Union[None, Model]:
         query = self.base_select.where(*args)
         result: AsyncResult = await self.session.execute(query)
-        return result.scalars().first()
+        return result.scalar_one_or_none()
 
     async def delete(self, id: Key) -> None:
         query = delete(self.model).where(self.model.id == id)

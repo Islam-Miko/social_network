@@ -162,10 +162,10 @@ class AuthService:
             )
 
         password_hash = self.handler.handler.get_hash(data.password)
-        user_id = await user_service.create(data)
+        user = await user_service.create(data)
         await credential_service.create(
             CredentialSchema(
-                login=data.login, password=password_hash, user_id=user_id
+                login=data.login, password=password_hash, user_id=user.id
             )
         )  # type: ignore
 
